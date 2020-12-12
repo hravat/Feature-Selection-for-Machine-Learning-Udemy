@@ -148,7 +148,7 @@ class FilterMethodQuasiConstantFeatures:
         
         for col in col_names:
             percent=round(df_X_train[col].value_counts()[0] / np.float(len(df_X_train))*100,4)
-            value=df_X_train['var_1'].value_counts().index[0]
+            value=df_X_train[col].value_counts().index[0]
             print("For column "+col+" the value "+str(value)+" has "+str(percent)+" percent of values")
         
         
