@@ -6,7 +6,7 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 from itertools import compress
 from sklearn.metrics.pairwise import cosine_similarity
-
+from sklearn.preprocessing import LabelEncoder
 
 
 class FilterMethodConstantFeatures:
@@ -335,4 +335,139 @@ class FilterMethodDuplicateFeatures:
         after_train_shape = np.shape(X_train)
         after_test_shape = np.shape(X_test)
           
-        self.__fit_summary(dup_list,before_test_shape,after_test_shape,before_train_shape,after_train_shape)          
+        self.__fit_summary(dup_list,before_test_shape,after_test_shape,before_train_shape,after_train_shape)   
+        
+        
+        
+class FilterMethodCorrelatedFeatues:
+    
+    def __init__(self,data_path):
+        self.df=pd.read_csv(data_path)
+        
+    def dataframe_info(self):
+        self.df.info()
+        
+    def dataframe_stats(self):
+        print(self.df.describe().T)
+        
+    def __train_test_split_fmb(self,target):
+        X_train, X_test, y_train, y_test = train_test_split(self.df.drop([target],axis='columns'),\
+                                                            self.df[target],\
+                                                            test_size=0.3, \
+                                                            random_state = 0
+                                                           )
+        return  X_train, X_test, y_train, y_test
+    
+    def __correlation_summary(self,summary_list,
+                                   before_train_shape,
+                                   before_test_shape,
+                                   after_train_shape,
+                                   after_test_shape):
+        
+        print('----------Correlated Features Summary---------------')
+        print('There are a total of '+str(len(summary_list))+' correlated features')
+        print('----------------------------------------------------')      
+        print('Train Shape before drop '+str(before_test_shape))
+        print('Train Shape after drop '+str(after_test_shape))
+        print('Test Shape before drop '+str(before_train_shape))
+        print('Test Shape after drop '+str(after_train_shape))
+        print('----------------------------------------------------')
+        
+        
+        for i in summary_list:
+            print('The correlation beteen '+i[1]+' and '+i[2]+' is '+str(i[0]))
+    
+    def visualize_corr(self,target):
+        X_train, X_test, y_train, y_test = self.__train_test_split_fmb(target)  
+        
+        correlation_matrix = X_train.corr(method='pearson')
+        cmap = sns.diverging_palette(20, 220, as_cmap=True)
+
+        # some more parameters for the figure
+        fig, ax = plt.subplots()
+        fig.set_size_inches(11,11)
+
+        # and now plot the correlation matrix
+        sns.heatmap(correlation_matrix, cmap=cmap)
+        
+        
+    def correlation_brute_force(self,target,threshold=0.8):
+    
+    
+        X_train, X_test, y_train, y_test = self.__train_test_split_fmb(target)
+    
+        col_corr = set()
+        corr_matrix = X_train.corr()
+        summary_list = []
+    
+    
+        for i in range(len(corr_matrix.columns)):
+            for j in range(i):
+                if (abs(corr_matrix.iloc[i, j]) > threshold): 
+                
+                    summary_list.append([round(corr_matrix.iloc[i, j],3),corr_matrix.columns[i],corr_matrix.columns[j]])
+                    # get the name of the correlated feature
+                    colname = corr_matrix.columns[j]
+                    # and add it to our correlated set
+                    col_corr.add(colname)
+                
+                
+        before_train_shape = np.shape(X_train)
+        before_test_shape = np.shape(X_test)
+        
+        X_train.drop(col_corr,inplace=True,axis=1)
+        X_test.drop(col_corr,inplace=True,axis=1)
+        
+        after_train_shape = np.shape(X_train)
+        after_test_shape = np.shape(X_test)
+                
+        self.__correlation_summary(summary_list,
+                                   before_train_shape,
+                                   before_test_shape,
+                                   after_train_shape,
+                                   after_test_shape
+                                  )
+                
+                
+                
+        return col_corr     
+        
+        
+    def correlation_group_features(self,target,threshold=0.8):
+            
+        X_train, X_test, y_train, y_test = self.__train_test_split_fmb(target)
+    
+        col_corr = set()
+        corr_matrix = X_train.corr()
+        summary_list = []
+    
+    
+        for i in range(len(corr_matrix.columns)):
+            for j in range(i,len(corr_matrix.columns)):
+                if (abs(corr_matrix.iloc[i, j]) > threshold) and (corr_matrix.columns[j] != corr_matrix.columns[i]): 
+                    summary_list.append([corr_matrix.columns[i],corr_matrix.columns[j],round(abs(corr_matrix.iloc[i, j]),3)])
+                    
+        summary_list=pd.DataFrame(summary_list)
+        summary_list.columns = ['feature1', 'feature2', 'corr']
+        
+        summary_list.sort_values(['feature1', 'feature2'])
+        
+        le = LabelEncoder()
+        
+        summary_list['group'] = le.fit_transform(summary_list['feature1'])
+        
+        
+        return summary_list
+            
+            
+            
+            
+            
+            
+       
+    
+    
+    
+    
+    
+    
