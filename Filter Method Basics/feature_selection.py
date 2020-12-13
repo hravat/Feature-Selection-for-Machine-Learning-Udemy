@@ -10,17 +10,27 @@ from sklearn.preprocessing import LabelEncoder
 
 
 class FilterMethodConstantFeatures:
+    'Class used to remove any constant features that have the same value for all the records'
+    
     def __init__(self,data_path):
         self.df=pd.read_csv(data_path)
         
     def dataframe_info(self):
+        'Gives the number of records and columns and the size of the dataframe'
         self.df.info()
         
     def dataframe_stats(self):
+        'Gives the summary statistics like perentieles means std deviations etc.'
         print(self.df.describe().T)
         
         
     def __train_test_split_fmb(self,target):
+        '''
+        This is a private function
+        Pass in a data frame it it will split it in test and training sets
+        Arguments :- target column to be predicted
+        '''
+        
         X_train, X_test, y_train, y_test = train_test_split(self.df.drop([target],axis='columns'),\
                                                             self.df[target],\
                                                             test_size=0.3, \
@@ -29,6 +39,11 @@ class FilterMethodConstantFeatures:
         return  X_train, X_test, y_train, y_test
     
     def __fit_summary(self,num_not_constant_features,num_constant_features,initial_shape_xtrain,initial_shape_xtest,X_train,X_test):        
+            '''
+            This is a private function
+            It prints the summary
+            '''
+            
             print('----Fit Summary------')
             print('---------------------')
             print('A total of '+str(num_not_constant_features)+' features are not constant')
@@ -42,6 +57,10 @@ class FilterMethodConstantFeatures:
             
         
     def varinance_threshold(self,target):
+        '''
+        Remeoves columns with 0 variance implying all values are the same 
+        This would not work on numeric columns
+        '''
         X_train, X_test, y_train, y_test = self.__train_test_split_fmb(target)
         
         sel = VarianceThreshold(threshold=0)
@@ -67,6 +86,11 @@ class FilterMethodConstantFeatures:
         
         
     def pandas_std(self,target):
+        '''
+        Remeoves columns with 0 variance implying all values are the same 
+        This would not work on numeric columns
+        This uses pandas standar deviation
+        '''
         X_train, X_test, y_train, y_test = self.__train_test_split_fmb(target)   
         consant_features =[features for features in X_train.columns if X_train[features].std() == 0 ]
         
@@ -87,6 +111,10 @@ class FilterMethodConstantFeatures:
                            X_test)
         
     def pandas_nunique(self,target):
+        '''
+        This works on cateforical as well as numeric variables
+        It removes columns where the unique count is 1 
+        '''
         X_train, X_test, y_train, y_test = self.__train_test_split_fmb(target)   
         consant_features =[features for features in X_train.columns if X_train[features].nunique() == 1]
         
@@ -108,17 +136,25 @@ class FilterMethodConstantFeatures:
         
         
 class FilterMethodQuasiConstantFeatures:
-    
+    'Class with methods to remove quasi constant features where 99% of the records have a single value'
     def __init__(self,data_path):
         self.df=pd.read_csv(data_path)
         
     def dataframe_info(self):
+        'Gives the number of records and columns and the size of the dataframe'
         self.df.info()
         
     def dataframe_stats(self):
+        'Gives the summary statistics like perentieles means std deviations etc.'
         print(self.df.describe().T)
         
     def __train_test_split_fmb(self,target):
+        '''
+        This is a private function
+        Pass in a data frame it it will split it in test and training sets
+        Arguments :- target column to be predicted
+        '''
+        
         X_train, X_test, y_train, y_test = train_test_split(self.df.drop([target],axis='columns'),\
                                                             self.df[target],\
                                                             test_size=0.3, \
@@ -127,6 +163,11 @@ class FilterMethodQuasiConstantFeatures:
         return  X_train, X_test, y_train, y_test
     
     def __fit_summary(self,num_not_constant_features,num_constant_features,initial_shape_xtrain,initial_shape_xtest,X_train,X_test,var_threshold=0):        
+            '''
+            This is a private function
+            It prints the summaries
+            '''
+            
             print('----Fit Summary------')
             print('---------------------')
             if var_threshold == 0:
@@ -142,7 +183,10 @@ class FilterMethodQuasiConstantFeatures:
             print('The test shape after fit is '+str(np.shape(X_train)))
             
     def __quasi_variance_summary(self,df_X_train,col_names):
-        
+        '''
+            This is a private function
+            It prints the summaries
+        '''
         
         print('--------Summary of Value Percenteges--------------')
         
@@ -157,6 +201,10 @@ class FilterMethodQuasiConstantFeatures:
             
             
     def pandas_nunique_constant_features(self,target,print_summ=True):
+        '''
+        This works on cateforical as well as numeric variables
+        It removes columns where the unique count is 1 
+        '''
         X_train, X_test, y_train, y_test = self.__train_test_split_fmb(target)   
         consant_features =[features for features in X_train.columns if X_train[features].nunique() == 1]
         
@@ -185,6 +233,10 @@ class FilterMethodQuasiConstantFeatures:
     
     
     def varinance_threshold(self,var_threshold,target):
+        '''
+        Remeoves columns with 0 variance implying all values are the same 
+        This would not work on numeric columns
+        '''
         
         X_train, X_test, y_train, y_test = self.pandas_nunique_constant_features(target,print_summ=False)  
         col_names=X_train.columns
@@ -216,7 +268,12 @@ class FilterMethodQuasiConstantFeatures:
         
         
     def quasi_constant_manual(self,target,threshold=0.998):
-            
+        '''
+        This function removes features if the percentage of a single value
+        in the feature is higher than the threshold 
+        '''
+        
+        
         X_train, X_test, y_train, y_test = self.pandas_nunique_constant_features(target,print_summ=False)    
         col_names=X_train.columns
         # Make deep instead of shallow copy to create an entirly new datafeame
@@ -261,12 +318,19 @@ class FilterMethodDuplicateFeatures:
         self.df=pd.read_csv(data_path)
         
     def dataframe_info(self):
+        'Gives the number of records and columns and the size of the dataframe'
         self.df.info()
         
     def dataframe_stats(self):
+        'Gives the summary statistics like perentieles means std deviations etc.'
         print(self.df.describe().T)
         
     def __train_test_split_fmb(self,target):
+        '''
+        This is a private function
+        Pass in a data frame it it will split it in test and training sets
+        Arguments :- target column to be predicted
+        '''
         X_train, X_test, y_train, y_test = train_test_split(self.df.drop([target],axis='columns'),\
                                                             self.df[target],\
                                                             test_size=0.3, \
@@ -276,6 +340,12 @@ class FilterMethodDuplicateFeatures:
     
     
     def __quasi_constant_manual(self,target,threshold=0.998):
+        '''
+        This is a private function
+        This function removes features if the percentage of a single value
+        in the feature is higher than the threshold 
+        '''
+        
         X_train, X_test, y_train, y_test = self.__train_test_split_fmb(target)     
         col_names=X_train.columns
         # Make deep instead of shallow copy to create an entirly new datafeame
@@ -299,7 +369,7 @@ class FilterMethodDuplicateFeatures:
     
     
     def __fit_summary(self,dup_list,before_test_shape,after_test_shape,before_train_shape,after_train_shape):
-        
+        'This prints a summary of the fit'
         print('--------summary of duplicate features------------------')
         print('There are a total of '+str(len(dup_list))+" duplicate features")
         print('--------------------------------------------------------------')
@@ -313,6 +383,9 @@ class FilterMethodDuplicateFeatures:
     
     
     def duplicate_features(self,target):
+        '''
+        Removes columns where values of one column are an exact match of the other
+        '''
         X_train,X_test = self.__quasi_constant_manual(target)
         
         dup_dict={}
@@ -345,12 +418,19 @@ class FilterMethodCorrelatedFeatues:
         self.df=pd.read_csv(data_path)
         
     def dataframe_info(self):
+        'Gives the number of records and columns and the size of the dataframe'
         self.df.info()
         
     def dataframe_stats(self):
+        'Gives the summary statistics like perentieles means std deviations etc.'
         print(self.df.describe().T)
         
     def __train_test_split_fmb(self,target):
+        '''
+        This is a private function
+        Pass in a data frame it it will split it in test and training sets
+        Arguments :- target column to be predicted
+        '''
         X_train, X_test, y_train, y_test = train_test_split(self.df.drop([target],axis='columns'),\
                                                             self.df[target],\
                                                             test_size=0.3, \
@@ -363,6 +443,9 @@ class FilterMethodCorrelatedFeatues:
                                    before_test_shape,
                                    after_train_shape,
                                    after_test_shape):
+        '''
+        Gives a summary of correltad features
+        '''
         
         print('----------Correlated Features Summary---------------')
         print('There are a total of '+str(len(summary_list))+' correlated features')
@@ -378,6 +461,9 @@ class FilterMethodCorrelatedFeatues:
             print('The correlation beteen '+i[1]+' and '+i[2]+' is '+str(i[0]))
     
     def visualize_corr(self,target):
+        '''
+        Plots correlation heatmap of dataframe
+        '''
         X_train, X_test, y_train, y_test = self.__train_test_split_fmb(target)  
         
         correlation_matrix = X_train.corr(method='pearson')
@@ -392,7 +478,9 @@ class FilterMethodCorrelatedFeatues:
         
         
     def correlation_brute_force(self,target,threshold=0.8):
-    
+        '''
+        Calculates correlation of each feature with the other
+        ''' 
     
         X_train, X_test, y_train, y_test = self.__train_test_split_fmb(target)
     
@@ -434,7 +522,12 @@ class FilterMethodCorrelatedFeatues:
         
         
     def correlation_group_features(self,target,threshold=0.8):
-            
+        '''
+        Returns a set of columns whose correlation is above threshold
+        Default threshold os 0.8
+        '''
+        
+        
         X_train, X_test, y_train, y_test = self.__train_test_split_fmb(target)
     
         col_corr = set()
