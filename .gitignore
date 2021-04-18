@@ -1,2 +1,17 @@
 /data/*
 Filter Method Basics/.ipynb_checkpoints/Filter Method Basics-checkpoint.ipynb
+Filter Method Basics/.ipynb_checkpoints/Filter Method Constant Features-checkpoint.ipynb
+Filter Method Basics/.ipynb_checkpoints/Filter Method Correlations-checkpoint.ipynb
+Filter Method Basics/.ipynb_checkpoints/Filter Method Duplicate Features-checkpoint.ipynb
+Filter Method Basics/.ipynb_checkpoints/Filter Method Quasi Constant Features-checkpoint.ipynb
+Filter Method Basics/__pycache__/feature_selection.cpython-38.pyc
+Filter Method Basics/classfiles/__init__.py
+Filter Method Basics/classfiles/.ipynb_checkpoints/feature_selection-checkpoint.py
+Filter Method Basics/classfiles/.ipynb_checkpoints/__init__-checkpoint.py
+Filter Method Basics/classfiles/__pycache__/__init__.cpython-38.pyc
+Filter Method Basics/classfiles/__pycache__/feature_selection.cpython-38.pyc
+Filter Method Statistics Measures/.ipynb_checkpoints/Anova-checkpoint.ipynb
+Filter Method Statistics Measures/.ipynb_checkpoints/Chi Square Feature Selection-checkpoint.ipynb
+Filter Method Statistics Measures/.ipynb_checkpoints/Mutual Info Feature Selection-checkpoint.ipynb
+Filter Method Statistics Measures/classfiles/.ipynb_checkpoints/feature_selection-checkpoint.py
+Filter Method Statistics Measures/classfiles/__pycache__/feature_selection.cpython-38.pyc
